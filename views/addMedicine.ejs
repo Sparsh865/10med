@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Medicine</title>
+    <style>
+        .hidden {
+            display: none;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #2196F3;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(14px);
+        }
+
+        .message {
+            color: red;
+            margin: 8px;
+            font-size: 24px;
+        }
+
+        .success-message {
+            color: green;
+            margin: 8px;
+            font-size:24px;
+        }
+    </style>
+    <script>
+        function filterSalts() {
+            const searchInput = document.getElementById('saltSearch').value.toLowerCase();
+            const salts = document.querySelectorAll('.salt-checkbox');
+
+            salts.forEach(checkbox => {
+                const saltName = checkbox.nextElementSibling.textContent.toLowerCase();
+                checkbox.parentElement.classList.toggle('hidden', !saltName.includes(searchInput));
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Add New Medicine</h1>
+
+    <% if (errorMsg) { %>
+        <div class="message">
+            <%= errorMsg %>
+        </div>
+        <% } %>
+
+            <% if (successMsg) { %>
+                <div class="success-message">
+                    <%= successMsg %>
+                </div>
+                <% } %>
+
+                    <form action="/admin/add-medicine" method="POST">
+                        <!-- Form Fields -->
+                        <div>
+                            <label for="productName">Product Name:</label>
+                            <input type="text" id="productName" name="productName" required>
+                        </div>
+
+                        <div>
+                            <label for="productPrice">Product Price:</label>
+                            <input type="number" id="productPrice" name="productPrice" required>
+                        </div>
+
+                        <div>
+                            <label for="productBrand">Product Brand:</label>
+                            <input type="text" id="productBrand" name="productBrand" required>
+                        </div>
+
+                        <div>
+                            <label for="productDescription">Product Description:</label>
+                            <textarea id="productDescription" name="productDescription" required></textarea>
+                        </div>
+
+                        <div>
+                            <label for="prescriptionRequired">Prescription Required:</label>
+                            <label class="switch">
+                                <input type="checkbox" id="prescriptionRequired" name="prescriptionRequired">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div>
+                            <label for="stockQuantity">Stock Quantity:</label>
+                            <input type="number" id="stockQuantity" name="stockQuantity" required>
+                        </div>
+
+                        <div>
+                            <label for="categoryId">Category:</label>
+                            <select id="categoryId" name="categoryId" required>
+                                <% categories.forEach(category=> { %>
+                                    <option value="<%= category._id %>">
+                                        <%= category.categoryName %>
+                                    </option>
+                                    <% }) %>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="typeId">Product Type:</label>
+                            <select id="typeId" name="typeId" required>
+                                <% types.forEach(type=> { %>
+                                    <option value="<%= type._id %>">
+                                        <%= type.typeName %>
+                                    </option>
+                                    <% }) %>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="manufacturingDate">Manufacturing Date:</label>
+                            <input type="date" id="manufacturingDate" name="manufacturingDate" required>
+                        </div>
+
+                        <div>
+                            <label for="expiryDate">Expiry Date:</label>
+                            <input type="date" id="expiryDate" name="expiryDate" required>
+                        </div>
+
+                        <div>
+                            <label for="listed">Listed:</label>
+                            <label class="switch">
+                                <input type="checkbox" id="listed" name="listed">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <h3>Select Salts:</h3>
+                        <input type="text" id="saltSearch" placeholder="Search Salts" onkeyup="filterSalts()">
+                        <div id="saltsList">
+                            <% salts.forEach(salt=> { %>
+                                <div data-salt="<%= salt %>">
+                                    <input type="checkbox" class="salt-checkbox" name="productSalt" value="<%= salt %>">
+                                    <label>
+                                        <%= salt %>
+                                    </label>
+                                </div>
+                                <% }) %>
+                        </div>
+
+                        <button type="submit">Add Medicine</button>
+                    </form>
+
+                    <br>
+                    <a href="/admin" class="back-button">Back to Admin Dashboard</a>
+</body>
+
+</html>

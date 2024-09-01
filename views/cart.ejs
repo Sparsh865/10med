@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 15px 20px;
+            text-align: center;
+        }
+
+        .header .button {
+            color: #fff;
+            background-color: #007bff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 5px;
+            display: inline-block;
+        }
+
+        .header .button:hover {
+            background-color: #0056b3;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        .cart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .cart-item {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 80%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+
+        .cart-item h2 {
+            font-size: 1.5em;
+            margin: 0 0 10px;
+        }
+
+        .cart-item p {
+            margin: 10px 0;
+        }
+
+        .button {
+            color: #fff;
+            background-color: #28a745;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .button:hover {
+            background-color: #218838;
+        }
+
+        .go-to-cart,
+        .go-back {
+            display: block;
+            margin: 20px auto;
+            color: #fff;
+            background-color: #007bff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .go-to-cart:hover,
+        .go-back:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Your Cart</h1>
+        <a href="/user/medicines" class="go-to-cart">Go to Medicines</a>
+        <a href="/user" class="go-back">Back to Dashboard</a>
+    </header>
+    <main>
+        <div class="cart-container">
+            <% if (cart.length> 0) { %>
+                <% cart.forEach(item=> { %>
+                    <div class="cart-item">
+                        <h2>
+                            <%= item.medicineId.productName %>
+                        </h2>
+                        <p>Price: $<%= item.medicineId.productPrice %>
+                        </p>
+                        <p>Quantity: <%= item.quantity %>
+                        </p>
+                        <p>Total: $<%= item.medicineId.productPrice * item.quantity %>
+                        </p>
+                        <form action="/user/cart/remove" method="post" style="display: inline;">
+                            <input type="hidden" name="medicineId" value="<%= item.medicineId %>">
+                            <button type="submit" class="button">Remove</button>
+                        </form>
+                    </div>
+                    <% }) %>
+                        <h3>Total Amount: $<%= totalAmount %>
+                        </h3>
+                        <a href="/user/checkout" class="button">Proceed to Checkout</a>
+                        <% } else { %>
+                            <p>Your cart is empty.</p>
+                            <% } %>
+        </div>
+    </main>
+</body>
+
+</html>

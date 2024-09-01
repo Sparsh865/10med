@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicines</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 15px 20px;
+            text-align: center;
+        }
+
+        .header .button {
+            color: #fff;
+            background-color: #007bff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 5px;
+            display: inline-block;
+        }
+
+        .header .button:hover {
+            background-color: #0056b3;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        .medicines-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .medicine-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .medicine-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .medicine-card h2 {
+            font-size: 1.5em;
+            margin: 0 0 10px;
+        }
+
+        .medicine-card p {
+            margin: 10px 0;
+        }
+
+        .medicine-card .button {
+            color: #fff;
+            background-color: #28a745;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .medicine-card .button:hover {
+            background-color: #218838;
+        }
+
+        .go-to-cart,
+        .go-back {
+            display: block;
+            margin: 20px auto;
+            color: #fff;
+            background-color: #007bff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .go-to-cart:hover,
+        .go-back:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="/user/cart" class="go-to-cart">Go to Cart</a>
+    </header>
+    <main>
+        <div class="medicines-container">
+            <% medicines.forEach(medicine=> { %>
+                <% if (medicine.listed) { %>
+                    <div class="medicine-card">
+                        <h2>
+                            <%= medicine.productName %>
+                        </h2>
+                        <p><strong>Price:</strong> $<%= medicine.productPrice %>
+                        </p>
+                        <p><strong>Brand:</strong>
+                            <%= medicine.productBrand %>
+                        </p>
+                        <p><strong>Description:</strong>
+                            <%= medicine.productDescription %>
+                        </p>
+                        <form action="/cart/add" method="post">
+                            <input type="hidden" name="medicineId" value="<%= medicine._id %>">
+                            <input type="number" name="quantity" min="1" value="1" style="width: 60px; text-align: center;">
+                            <button type="submit" class="button">Add to Cart</button>
+                        </form>
+                    </div>
+                    <% } %>
+                        <% }) %>
+        </div>
+        <a href="/user" class="go-back">Back to Dashboard</a>
+    </main>
+</body>
+
+</html>

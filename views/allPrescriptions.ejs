@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Prescriptions</title>
+    <style>
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 300px;
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        .card h3 {
+            margin-top: 0;
+        }
+
+        .message {
+            color: red;
+            margin: 16px;
+        }
+
+        .success-message {
+            color: green;
+            margin: 16px;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin: 16px;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>All Prescriptions</h1>
+
+    <% if (errorMsg) { %>
+        <div class="message">
+            <%= errorMsg %>
+        </div>
+        <% } %>
+
+            <% if (successMsg) { %>
+                <div class="success-message">
+                    <%= successMsg %>
+                </div>
+                <% } %>
+
+                    <a href="/admin" class="back-button">Back to Admin Dashboard</a>
+
+                    <div>
+                        <% prescriptions.forEach(prescription=> { %>
+                            <div class="card">
+                                <h3>Prescription ID: <%= prescription._id %>
+                                </h3>
+                                <p><strong>Doctor:</strong>
+                                    <%= prescription.doctorName %>
+                                </p>
+                                <p><strong>Title:</strong>
+                                    <%= prescription.title %>
+                                </p>
+                                <p><strong>Description:</strong>
+                                    <%= prescription.desc %>
+                                </p>
+                                <p><strong>Content:</strong>
+                                    <%= prescription.content %>
+                                </p>
+                                <p><strong>User Email:</strong>
+                                    <% if (prescription.userId) { %>
+                                        <!-- Assuming you are populating user data in the backend before rendering -->
+                                        <%= prescription.userId.email || 'No Email Available' %>
+                                            <% } else { %>
+                                                No User Information
+                                                <% } %>
+                                </p>
+                                <p><strong>Created At:</strong>
+                                    <%= (prescription.createdAt ? prescription.createdAt.toDateString()
+                                        : 'Date Not Available' ) %>
+                                </p>
+                            </div>
+                            <% }); %>
+                    </div>
+</body>
+
+</html>

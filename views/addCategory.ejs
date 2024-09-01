@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Categories</title>
+    <style>
+        .message {
+            margin: 16px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .error-message {
+            color: red;
+            background-color: #fdd;
+        }
+
+        .success-message {
+            color: green;
+            background-color: #dfd;
+        }
+
+        .category-item {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .remove-button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .remove-button:hover {
+            background-color: #d32f2f;
+        }
+
+        .back-button {
+            margin-top: 20px;
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .back-button:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Manage Categories</h1>
+
+    <!-- Display Messages -->
+    <% if (errorMsg) { %>
+        <div class="message error-message">
+            <%= errorMsg %>
+        </div>
+        <% } %>
+
+            <% if (successMsg) { %>
+                <div class="message success-message">
+                    <%= successMsg %>
+                </div>
+                <% } %>
+
+                    <!-- Form to Add Category -->
+                    <form action="/admin/add-category" method="POST">
+                        <div>
+                            <label for="categoryName">Category Name:</label>
+                            <input type="text" id="categoryName" name="categoryName" required>
+                        </div>
+                        <div>
+                            <label for="categoryDescription">Category Description:</label>
+                            <textarea id="categoryDescription" name="categoryDescription" required></textarea>
+                        </div>
+                        <button type="submit">Add Category</button>
+                    </form>
+                    <br>
+
+                    <!-- List of Existing Categories with Remove Option -->
+                    <h2>Existing Categories</h2>
+                    <ul>
+                        <% categories.forEach(category=> { %>
+                            <li class="category-item">
+                                <div>
+                                    <strong>
+                                        <%= category.categoryName %>
+                                    </strong> - <%= category.description %>
+                                </div>
+                                <form action="/admin/remove-category/<%= category._id %>" method="POST"
+                                    onsubmit="return confirm('Are you sure you want to remove this category?');">
+                                    <button type="submit" class="remove-button">Remove</button>
+                                </form>
+                            </li>
+                            <% }); %>
+                    </ul>
+
+                    <br>
+                    <a href="/admin" class="back-button">Back to Admin Dashboard</a>
+</body>
+
+</html>

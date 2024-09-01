@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Stock</title>
+    <style>
+        .message {
+            margin: 16px;
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .error-message {
+            color: red;
+            background-color: #fdd;
+        }
+
+        .success-message {
+            color: green;
+            background-color: #dfd;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Update Stock Item</h1>
+
+    <% if (errorMsg) { %>
+        <div class="message error-message">
+            <%= errorMsg %>
+        </div>
+        <% } %>
+
+            <% if (successMsg) { %>
+                <div class="message success-message">
+                    <%= successMsg %>
+                </div>
+                <% } %>
+
+                    <% if (stockItem) { %>
+                        <form action="/admin/update-stock/<%= stockItem._id %>" method="POST">
+                            <div>
+                                <label for="productName">Product Name:</label>
+                                <input type="text" id="productName" name="productName"
+                                    value="<%= stockItem.productName %>" required>
+                            </div>
+
+                            <div>
+                                <label for="categoryId">Category:</label>
+                                <select id="categoryId" name="categoryId" required>
+                                    <% categories.forEach(category=> { %>
+                                        <option value="<%= category._id %>" <%=stockItem.categoryId &&
+                                            stockItem.categoryId._id.toString()===category._id.toString() ? 'selected'
+                                            : '' %>>
+                                            <%= category.categoryName %>
+                                        </option>
+                                        <% }) %>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="typeId">Type:</label>
+                                <select id="typeId" name="typeId" required>
+                                    <% types.forEach(type=> { %>
+                                        <option value="<%= type._id %>" <%=stockItem.typeId &&
+                                            stockItem.typeId._id.toString()===type._id.toString() ? 'selected' : '' %>>
+                                            <%= type.typeName %>
+                                        </option>
+                                        <% }) %>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="productPrice">Product Price:</label>
+                                <input type="number" id="productPrice" name="productPrice"
+                                    value="<%= stockItem.productPrice %>" required>
+                            </div>
+
+                            <div>
+                                <label for="stockQuantity">Stock Quantity:</label>
+                                <input type="number" id="stockQuantity" name="stockQuantity"
+                                    value="<%= stockItem.stockQuantity %>" required>
+                            </div>
+
+                            <div>
+                                <label for="prescriptionRequired">Prescription Required:</label>
+                                <select id="prescriptionRequired" name="prescriptionRequired" required>
+                                    <option value="true" <%=stockItem.prescriptionRequired ? 'selected' : '' %>>Yes
+                                    </option>
+                                    <option value="false" <%=!stockItem.prescriptionRequired ? 'selected' : '' %>>No
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="manufacturingDate">Manufacturing Date:</label>
+                                <input type="date" id="manufacturingDate" name="manufacturingDate"
+                                    value="<%= stockItem.manufacturingDate.toISOString().substring(0, 10) %>" required>
+                            </div>
+
+                            <div>
+                                <label for="expiryDate">Expiry Date:</label>
+                                <input type="date" id="expiryDate" name="expiryDate"
+                                    value="<%= stockItem.expiryDate.toISOString().substring(0, 10) %>" required>
+                            </div>
+
+                            <button type="submit">Update Stock</button>
+                        </form>
+                        <% } %>
+
+        <a href="/admin" class="back-button">Back to Admin Dashboard</a>
+</body>
+
+</html>

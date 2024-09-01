@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <style>
+        .options {
+            margin: 20px;
+        }
+
+        .option {
+            margin: 10px 0;
+        }
+
+        .option a {
+            text-decoration: none;
+            color: #000;
+            font-weight: bold;
+            padding: 10px 20px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        .option a:hover {
+            background-color: #ccc;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Welcome to User Dashboard</h1>
+    <div class="options">
+        <div class="option">
+            <a href="/user/medicines">Show All Medicines</a>
+        </div>
+        <div class="option">
+            <a href="/user/prescriptions">Add Prescription</a>
+        </div>
+        <div class="option">
+            <a href="/user/show-orders">Show All Orders</a>
+        </div>
+        <div class="option">
+            <a href="/user/update-details">Update Details</a>
+        </div>
+        <div class="option">
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+</body>
+
+</html>
