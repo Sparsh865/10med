@@ -37,7 +37,7 @@ const stockSchema = new Schema({
     productPrice: { type: Number, required: true },
     productBrand: { type: String, required: true },
     productDescription: { type: String, required: true },
-    productSalt: [{ type: String }], // Array of strings for salts
+    productSalt: [{ type: String }], 
     prescriptionRequired: { type: Boolean, required: true },
     stockQuantity: { type: Number, required: true },
     categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
@@ -53,9 +53,9 @@ const orderSchema = new Schema({
     items: [{
         productId: { type: Schema.Types.ObjectId, ref: 'Stock', required: true },
         quantity: { type: Number, required: true },
-        price: { type: Number, required: true } // Price per item
+        price: { type: Number, required: true } 
     }],
-    orderValue: { type: Number, required: true }, // Total order value
+    orderValue: { type: Number, required: true }, 
     paymentMethod: {
         type: String,
         required: true,
@@ -70,7 +70,7 @@ const orderSchema = new Schema({
         type: String,
         required: true,
         enum: ['Pending', 'Approved', 'Cancelled'],
-        default: 'Pending' // Order status
+        default: 'Pending' 
     }
 });
 
