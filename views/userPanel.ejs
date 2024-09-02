@@ -6,47 +6,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard</title>
     <style>
-        .options {
-            margin: 20px;
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
         }
 
-        .option {
-            margin: 10px 0;
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
         .option a {
             text-decoration: none;
-            color: #000;
+            color: white;
             font-weight: bold;
-            padding: 10px 20px;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-            display: inline-block;
+            padding: 12px 20px;
+            background-color: #007bff;
+            border-radius: 8px;
+            display: block;
+            transition: background-color 0.3s ease;
         }
 
         .option a:hover {
-            background-color: #ccc;
+            background-color: #0056b3;
+        }
+
+        .option a:active {
+            background-color: #004494;
         }
     </style>
 </head>
 
 <body>
-    <h1>Welcome to User Dashboard</h1>
-    <div class="options">
-        <div class="option">
-            <a href="/user/medicines">Show All Medicines</a>
-        </div>
-        <div class="option">
-            <a href="/user/prescriptions">Add Prescription</a>
-        </div>
-        <div class="option">
-            <a href="/user/show-orders">Show All Orders</a>
-        </div>
-        <div class="option">
-            <a href="/user/update-details">Update Details</a>
-        </div>
-        <div class="option">
-            <a href="/logout">Logout</a>
+    <div class="container">
+        <h1>Welcome to User Dashboard</h1>
+        <div class="options">
+            <div class="option">
+                <a href="/user/medicines">Show All Medicines</a>
+            </div>
+            <div class="option">
+                <a href="/user/prescriptions">Add Prescription</a>
+            </div>
+            <div class="option">
+                <a href="/user/show-orders">Show All Orders</a>
+            </div>
+            <div class="option">
+                <a href="/user/update-details">Update Details</a>
+            </div>
+            <div class="option">
+                <a href="/logout">Logout</a>
+            </div>
         </div>
     </div>
 </body>

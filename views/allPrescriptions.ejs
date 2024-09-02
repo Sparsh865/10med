@@ -6,46 +6,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Prescriptions</title>
     <style>
-        .card {
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 16px;
-            margin: 16px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 300px;
-            display: inline-block;
-            vertical-align: top;
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
         }
 
-        .card h3 {
-            margin-top: 0;
+        h1 {
+            text-align: center;
+            margin: 20px 0;
+            color: #007bff;
+        }
+
+        .message,
+        .success-message {
+            text-align: center;
+            margin: 16px;
         }
 
         .message {
             color: red;
-            margin: 16px;
         }
 
         .success-message {
             color: green;
-            margin: 16px;
         }
 
         .back-button {
-            display: inline-block;
-            margin: 16px;
-            padding: 8px 16px;
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
             background-color: #007bff;
             color: #fff;
             text-decoration: none;
             border-radius: 4px;
+            text-align: center;
+            font-size: 16px;
+            max-width: 200px;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
+            padding: 0 16px;
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 300px;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 18px;
+        }
+
+        .card p {
+            margin: 8px 0;
+            font-size: 14px;
         }
     </style>
 </head>
 
 <body>
     <h1>All Prescriptions</h1>
-
     <% if (errorMsg) { %>
         <div class="message">
             <%= errorMsg %>
@@ -57,35 +96,28 @@
                     <%= successMsg %>
                 </div>
                 <% } %>
-
                     <a href="/admin" class="back-button">Back to Admin Dashboard</a>
-
-                    <div>
+                    <div class="card-container">
                         <% prescriptions.forEach(prescription=> { %>
                             <div class="card">
                                 <h3>Prescription ID: <%= prescription._id %>
                                 </h3>
-                                <p><strong>Doctor:</strong>
-                                    <%= prescription.doctorName %>
+                                <p>Doctor: <%= prescription.doctorName %>
                                 </p>
-                                <p><strong>Title:</strong>
-                                    <%= prescription.title %>
+                                <p>Title: <%= prescription.title %>
                                 </p>
-                                <p><strong>Description:</strong>
-                                    <%= prescription.desc %>
+                                <p>Description: <%= prescription.desc %>
                                 </p>
-                                <p><strong>Content:</strong>
-                                    <%= prescription.content %>
+                                <p>Content: <%= prescription.content %>
                                 </p>
-                                <p><strong>User Email:</strong>
+                                <p>User Email:
                                     <% if (prescription.userId) { %>
-                                        <!-- Assuming you are populating user data in the backend before rendering -->
                                         <%= prescription.userId.email || 'No Email Available' %>
                                             <% } else { %>
                                                 No User Information
                                                 <% } %>
                                 </p>
-                                <p><strong>Created At:</strong>
+                                <p>Created At:
                                     <%= (prescription.createdAt ? prescription.createdAt.toDateString()
                                         : 'Date Not Available' ) %>
                                 </p>

@@ -6,8 +6,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Medicine</title>
     <style>
-        .hidden {
-            display: none;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            color: #007bff;
+            font-size: 28px;
+        }
+
+        form {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        textarea,
+        select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            height: 100px;
+            resize: vertical;
         }
 
         .switch {
@@ -15,6 +61,7 @@
             display: inline-block;
             width: 34px;
             height: 20px;
+            margin-top: 5px;
         }
 
         .switch input {
@@ -48,33 +95,98 @@
         }
 
         input:checked+.slider {
-            background-color: #2196F3;
+            background-color: #007bff;
         }
 
         input:checked+.slider:before {
             transform: translateX(14px);
         }
 
+        .message,
+        .success-message {
+            margin: 8px;
+            font-size: 18px;
+            text-align: center;
+        }
+
         .message {
             color: red;
-            margin: 8px;
-            font-size: 24px;
         }
 
         .success-message {
             color: green;
-            margin: 8px;
-            font-size:24px;
+        }
+
+        #saltSearch {
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+            width: calc(100% - 22px);
+            box-sizing: border-box;
+        }
+
+        #saltsList {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        #saltsList div {
+            display: flex;
+            align-items: center;
+        }
+
+        #saltsList input {
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: block;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .back-button {
+            display: block;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 20px auto;
+            max-width: 200px;
+            border: none;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
         }
     </style>
     <script>
         function filterSalts() {
             const searchInput = document.getElementById('saltSearch').value.toLowerCase();
-            const salts = document.querySelectorAll('.salt-checkbox');
+            const salts = document.querySelectorAll('#saltsList div');
 
-            salts.forEach(checkbox => {
-                const saltName = checkbox.nextElementSibling.textContent.toLowerCase();
-                checkbox.parentElement.classList.toggle('hidden', !saltName.includes(searchInput));
+            salts.forEach(div => {
+                const saltName = div.querySelector('label').textContent.toLowerCase();
+                div.style.display = saltName.includes(searchInput) ? 'flex' : 'none';
             });
         }
     </script>
@@ -96,7 +208,6 @@
                 <% } %>
 
                     <form action="/admin/add-medicine" method="POST">
-                        <!-- Form Fields -->
                         <div>
                             <label for="productName">Product Name:</label>
                             <input type="text" id="productName" name="productName" required>
@@ -186,7 +297,6 @@
                         <button type="submit">Add Medicine</button>
                     </form>
 
-                    <br>
                     <a href="/admin" class="back-button">Back to Admin Dashboard</a>
 </body>
 

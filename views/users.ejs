@@ -1,57 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Users</title>
     <style>
-        .card {
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 16px;
-            margin: 16px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 300px;
-            display: inline-block;
-            vertical-align: top;
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
         }
 
-        .card h3 {
-            margin-top: 0;
+        h1 {
+            text-align: center;
+            margin: 20px 0;
+            color: #007bff;
+        }
+
+        .message,
+        .success-message {
+            text-align: center;
+            margin: 16px;
         }
 
         .message {
             color: red;
-            margin: 16px;
         }
 
         .success-message {
             color: green;
-            margin: 16px;
         }
 
         .back-button {
-            display: inline-block;
+            display: block;
+            margin: 20px auto;
             padding: 10px 20px;
-            margin: 20px 0;
             background-color: #007bff;
             color: white;
             text-decoration: none;
             border-radius: 5px;
             font-size: 16px;
+            text-align: center;
+            max-width: 200px;
         }
 
         .back-button:hover {
             background-color: #0056b3;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
+            padding: 0 16px;
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 300px;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            text-align: center;
+        }
+
+        .card p {
+            margin: 4px 0;
+        }
+
+        .delete-button {
+            padding: 10px;
+            color: #fff;
+            background-color: #dc3545;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 14px;
+            width: 100%;
+            max-width: 200px;
+            margin-top: 16px;
+        }
+
+        .delete-button:hover {
+            background-color: #c82333;
         }
     </style>
 </head>
 
 <body>
     <h1>All Users</h1>
-
-    <!-- Message display -->
     <% if (errorMsg) { %>
         <div class="message">
             <%= errorMsg %>
@@ -63,37 +111,25 @@
                     <%= successMsg %>
                 </div>
                 <% } %>
-
-                    <!-- Back to Dashboard button -->
                     <a href="/admin" class="back-button">Back to Dashboard</a>
-
-                    <!-- Display all users -->
-                    <div>
+                    <div class="card-container">
                         <% users.forEach(user=> { %>
                             <div class="card">
                                 <h3>
                                     <%= user.name %>
                                 </h3>
-                                <p><strong>Email:</strong>
-                                    <%= user.email %>
+                                <p>Email: <%= user.email %>
                                 </p>
-                                <p><strong>Phone:</strong>
-                                    <%= user.phoneNumber %>
+                                <p>Phone: <%= user.phoneNumber %>
                                 </p>
-                                <p><strong>Address:</strong>
-                                    <%= user.address %>
+                                <p>Address: <%= user.address %>
                                 </p>
-                                <p><strong>Pin Code:</strong>
-                                    <%= user.pinCode %>
+                                <p>Pin Code: <%= user.pinCode %>
                                 </p>
-                                <p><strong>Gender:</strong>
-                                    <%= user.gender %>
+                                <p>Gender: <%= user.gender %>
                                 </p>
-                                <p><strong>Created At:</strong>
-                                    <%= user.createdAt.toDateString() %>
+                                <p>Created At: <%= user.createdAt.toDateString() %>
                                 </p>
-
-                                <!-- Delete User Form -->
                                 <form action="/admin/delete-user" method="POST">
                                     <input type="hidden" name="userId" value="<%= user._id %>">
                                     <button type="submit" class="delete-button">Delete User</button>

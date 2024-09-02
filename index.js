@@ -5,14 +5,14 @@ const db = require("./models/collections");
 const path = require("path");
 const session = require("express-session");
 const fs = require('fs');
-const mongoose = require('mongoose'); // Ensure mongoose is required
+const mongoose = require('mongoose'); 
 
 //Session Set-Up
 app.use(session({
-    secret: 'test@#$123', // Replace with a strong secret
+    secret: 'test@#$123', 
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false } // Set to true if using HTTPS
+    cookie: { secure: false }
 }));
 
 //Connection
@@ -24,7 +24,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 //Custom MiddleWare
-function isAdminLoggedIn(req, res, next) {
+function adminLogIn(req, res, next) {
     if (req.session.isAdmin) {
         return next();
     } else {
@@ -32,7 +32,7 @@ function isAdminLoggedIn(req, res, next) {
     }
 }
 
-function isUserLoggedIn(req, res, next) {
+function userLogIn(req, res, next) {
     if (req.session.isUser && req.session.user) {
         req.user = req.session.user; // Attach user details to the request object
         return next(); // User is logged in, proceed
@@ -88,7 +88,6 @@ app.get("/login", (req, res) => {
     res.render("login", { loginMsg });
 });
 
-
 app.post("/login", async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -96,23 +95,22 @@ app.post("/login", async (req, res) => {
         if (admin && admin.password === password) {
             // Set session for admin
             req.session.isAdmin = true;
-            req.session.isUser = false; // Regular users should not be considered logged in
+            req.session.isUser = false;
             req.session.user = { id: admin._id, email: admin.email };
             return res.redirect("/admin");
         }
-
         let user = await db.User.findOne({ email });
         if (user && user.password === password) {
+            //Set Session for user
             req.session.isAdmin = false;
-            req.session.isUser = true; // Regular users should not be considered logged in
+            req.session.isUser = true; 
             req.session.user = { id: user._id, email: user.email };
             return res.redirect("/user");
         }
-
-        res.render("login", { loginMsg: "Invalid credentials, please try again." });
+        res.render("login", { loginMsg: "Invalid credentials" });
     } catch (err) {
         console.error(err);
-        res.render("login", { loginMsg: "An error occurred. Please try again later." });
+        res.render("login", { loginMsg: "Error" });
     }
 });
 
@@ -144,8 +142,7 @@ app.post("/forgot-password", async (req, res) => {
 });
 
 //Admin Page
-// GET route for Admin Page
-app.get("/admin", isAdminLoggedIn, async (req, res) => {
+app.get("/admin", adminLogIn, async (req, res) => {
     try {
         const { successMsg, errorMsg } = req.query;
         res.render("admin", { successMsg, errorMsg });
@@ -155,7 +152,18 @@ app.get("/admin", isAdminLoggedIn, async (req, res) => {
     }
 });
 
-// POST route for deleting a user
+//See All Users - Admin
+app.get('/admin/all-users', adminLogIn, async (req, res) => {
+    try {
+        const users = await db.User.find();
+        res.render('users', { users, successMsg: null, errorMsg: null });
+    } catch (err) {
+        console.error(err);
+        res.redirect('/admin?errorMsg=Failed+to+load+users');
+    }
+});
+
+//Delete User Admin
 app.post("/admin/delete-user", async (req, res) => {
     const { userId } = req.body;
     try {
@@ -167,30 +175,8 @@ app.post("/admin/delete-user", async (req, res) => {
     }
 });
 
-//Logout
-app.get('/logout', (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            console.error('Failed to destroy session:', err);
-            return res.redirect('/admin'); 
-        }
-        res.redirect('/login'); 
-    });
-});
-
-//See All Users - Admin
-app.get('/admin/all-users', isAdminLoggedIn, async (req, res) => {
-    try {
-        const users = await db.User.find();
-        res.render('users', { users, successMsg: null, errorMsg: null });
-    } catch (err) {
-        console.error(err);
-        res.redirect('/admin?errorMsg=Failed+to+load+users');
-    }
-});
-
 //See all Orders - Admin
-app.get('/admin/all-orders', isAdminLoggedIn, async (req, res) => {
+app.get('/admin/all-orders', adminLogIn, async (req, res) => {
     try {
         const orders = await db.Order.find().populate('productId').populate('userId');
         res.render('AllOrders', { orders, successMsg: null, errorMsg: null });
@@ -200,22 +186,19 @@ app.get('/admin/all-orders', isAdminLoggedIn, async (req, res) => {
     }
 });
 
-// Route to see all prescriptions
-app.get('/admin/all-prescriptions', isAdminLoggedIn, async (req, res) => {
+// see all prescriptions - admin
+app.get('/admin/all-prescriptions', adminLogIn, async (req, res) => {
     try {
-        // Fetch prescriptions and populate the userId field with user details
-        const prescriptions = await db.Prescription.find().populate('userId', 'email'); // Only populate the email field of the user
-
+        const prescriptions = await db.Prescription.find().populate('userId', 'email'); 
         res.render('allPrescriptions', { prescriptions, successMsg: req.query.successMsg || null, errorMsg: req.query.errorMsg || null });
     } catch (err) {
         console.error(err);
-        // Redirect with an error message if fetching prescriptions fails
         res.redirect('/admin/all-prescriptions?errorMsg=Failed+to+load+prescriptions');
     }
 });
 
-//Route to see all Stock
-app.get('/admin/all-stock', isAdminLoggedIn, async (req, res) => {
+//See all Stock -admin
+app.get('/admin/all-stock', adminLogIn, async (req, res) => {
     try {
         const stock = await db.Stock.find()
             .populate('categoryId', 'categoryName')
@@ -229,24 +212,8 @@ app.get('/admin/all-stock', isAdminLoggedIn, async (req, res) => {
     }
 });
 
-//Route to add medicine
-app.get('/admin/add-medicine', isAdminLoggedIn, async (req, res) => {
-    try {
-        const categories = await db.Category.find(); 
-        const types = await db.MedicineType.find(); 
-        const salts = getSaltsFromFile();
-
-        const successMsg = req.query.successMsg || null;
-        const errorMsg = req.query.errorMsg || null;
-
-        res.render('addMedicine', { categories, salts, types, successMsg, errorMsg });
-    } catch (error) {
-        console.error(error);
-        res.render('addMedicine', { categories: [], salts: [], types: [], successMsg: null, errorMsg: 'Failed to load data' });
-    }
-});
-
-app.get('/admin/add-category', isAdminLoggedIn, async (req, res) => {
+//See Categories  - admin
+app.get('/admin/add-category', adminLogIn, async (req, res) => {
     try {
         const categories = await db.Category.find();
         res.render('addCategory', { errorMsg: null, successMsg: null, categories });
@@ -255,7 +222,8 @@ app.get('/admin/add-category', isAdminLoggedIn, async (req, res) => {
         res.render('addCategory', { errorMsg: 'Failed to load categories. Please try again later.', successMsg: null, categories: [] });
     }
 });
-app.post('/admin/add-category', isAdminLoggedIn, async (req, res) => {
+//Add category - admin
+app.post('/admin/add-category', adminLogIn, async (req, res) => {
     try {
         const { categoryName, categoryDescription } = req.body;
 
@@ -271,7 +239,8 @@ app.post('/admin/add-category', isAdminLoggedIn, async (req, res) => {
     }
 });
 
-app.get('/admin/add-type', isAdminLoggedIn, async (req, res) => {
+//Add Type - admin
+app.get('/admin/add-type', adminLogIn, async (req, res) => {
     try {
         const types = await db.MedicineType.find();
         const successMsg = req.query.successMsg || null;
@@ -284,7 +253,7 @@ app.get('/admin/add-type', isAdminLoggedIn, async (req, res) => {
     }
 });
 
-app.post('/admin/add-type', isAdminLoggedIn, async (req, res) => {
+app.post('/admin/add-type', adminLogIn, async (req, res) => {
     try {
         const { typeName, typeDescription } = req.body;
 
@@ -299,7 +268,24 @@ app.post('/admin/add-type', isAdminLoggedIn, async (req, res) => {
     }
 });
 
-app.post('/admin/add-medicine', isAdminLoggedIn, async (req, res) => {
+//Add medicine - admin
+app.get('/admin/add-medicine', adminLogIn, async (req, res) => {
+    try {
+        const categories = await db.Category.find();
+        const types = await db.MedicineType.find();
+        const salts = getSaltsFromFile();
+
+        const successMsg = req.query.successMsg || null;
+        const errorMsg = req.query.errorMsg || null;
+
+        res.render('addMedicine', { categories, salts, types, successMsg, errorMsg });
+    } catch (error) {
+        console.error(error);
+        res.render('addMedicine', { categories: [], salts: [], types: [], successMsg: null, errorMsg: 'Failed to load data' });
+    }
+});
+
+app.post('/admin/add-medicine', adminLogIn, async (req, res) => {
     try {
         const {
             productName,
@@ -337,18 +323,16 @@ app.post('/admin/add-medicine', isAdminLoggedIn, async (req, res) => {
     }
 });
 
-app.post('/admin/toggle-listed/:id', isAdminLoggedIn, async (req, res) => {
+//Listed/Unlisted - Admin
+app.post('/admin/toggle-listed/:id', adminLogIn, async (req, res) => {
     try {
         const { id } = req.params;
         const item = await db.Stock.findById(id);
-
         if (!item) {
             return res.status(404).send('Stock item not found');
         }
-
         item.listed = !item.listed;
         await item.save();
-
         res.redirect('/admin/all-stock');  
     } catch (error) {
         console.error(error);
@@ -356,11 +340,11 @@ app.post('/admin/toggle-listed/:id', isAdminLoggedIn, async (req, res) => {
     }
 });
 
-app.post('/admin/delete-stock/:id', isAdminLoggedIn, async (req, res) => {
+//Delete Stock - Admin
+app.post('/admin/delete-stock/:id', adminLogIn, async (req, res) => {
     try {
         const { id } = req.params;
         const result = await db.Stock.findByIdAndDelete(id);
-
         if (!result) {
             return res.status(404).send('Stock item not found');
         }
@@ -371,7 +355,8 @@ app.post('/admin/delete-stock/:id', isAdminLoggedIn, async (req, res) => {
     }
 });
 
-app.get('/admin/update-stock/:id', isAdminLoggedIn, async (req, res) => {
+//Update Stock- admin
+app.get('/admin/update-stock/:id', adminLogIn, async (req, res) => {
     try {
         const stockItem = await db.Stock.findById(req.params.id).populate('categoryId').populate('typeId');
         const categories = await db.Category.find(); 
@@ -387,7 +372,7 @@ app.get('/admin/update-stock/:id', isAdminLoggedIn, async (req, res) => {
     }
 });
 
-app.post('/admin/update-stock/:id', isAdminLoggedIn, async (req, res) => {
+app.post('/admin/update-stock/:id', adminLogIn, async (req, res) => {
     try {
         const { productName, categoryId, typeId, productPrice, stockQuantity, prescriptionRequired, manufacturingDate, expiryDate } = req.body;
 
@@ -408,7 +393,6 @@ app.post('/admin/update-stock/:id', isAdminLoggedIn, async (req, res) => {
         if (!updatedStock) {
             return res.render('updateStock', { errorMsg: 'Failed to update the stock item. Item not found.', successMsg: null, stockItem: null, categories, types });
         }
-
         res.render('updateStock', { errorMsg: null, successMsg: 'Stock item updated successfully!', stockItem: updatedStock, categories, types });
     } catch (error) {
         console.error(error);
@@ -419,11 +403,11 @@ app.post('/admin/update-stock/:id', isAdminLoggedIn, async (req, res) => {
     }
 });
 
-app.post('/admin/remove-category/:id', isAdminLoggedIn, async (req, res) => {
+//Remove Category - admin
+app.post('/admin/remove-category/:id', adminLogIn, async (req, res) => {
     try {
         const categoryId = req.params.id;
         await db.Category.findByIdAndDelete(categoryId);
-
         res.render('addCategory', { errorMsg: null, successMsg: 'Category removed successfully!', categories: await db.Category.find() });
     } catch (error) {
         console.error(error);
@@ -431,7 +415,7 @@ app.post('/admin/remove-category/:id', isAdminLoggedIn, async (req, res) => {
     }
 });
 
-app.post('/admin/remove-type/:id', isAdminLoggedIn, async (req, res) => {
+app.post('/admin/remove-type/:id', adminLogIn, async (req, res) => {
     try {
         const typeId = req.params.id;
         await db.MedicineType.findByIdAndDelete(typeId);
@@ -443,7 +427,39 @@ app.post('/admin/remove-type/:id', isAdminLoggedIn, async (req, res) => {
     }
 });
 
-app.get("/user", isUserLoggedIn, async (req, res) => {
+//Show All Orders - admin
+app.get('/admin/show-all-orders', adminLogIn, async (req, res) => {
+    try {
+        const orders = await db.Order.find().populate({
+            path: 'items.productId',
+            select: 'productName'
+        }).exec();
+        res.render('show-all-orders', { orders });
+    } catch (err) {
+        console.error(err);
+        res.render('show-all-orders', { orders: [], errorMsg: 'Failed to load orders.' });
+    }
+});
+
+//Update Order Status - Admin
+app.post('/admin/update-order-status/:orderId', adminLogIn, async (req, res) => {
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    if (!['Pending', 'Approved', 'Cancelled'].includes(status)) {
+        return res.redirect('/admin/show-all-orders');
+    }
+    try {
+        await db.Order.findByIdAndUpdate(orderId, { status }).exec();
+        res.redirect('/admin/show-all-orders');
+    } catch (err) {
+        console.error(err);
+        res.redirect('/admin/show-all-orders');
+    }
+});
+
+//User
+app.get("/user", userLogIn, async (req, res) => {
     try {
         res.render("userPanel");
     } catch (err) {
@@ -452,7 +468,8 @@ app.get("/user", isUserLoggedIn, async (req, res) => {
     }
 });
 
-app.get("/user/medicines",isUserLoggedIn, async (req, res) => {
+//See all medicines - User
+app.get("/user/medicines",userLogIn, async (req, res) => {
     try {
         const medicines = await db.Stock.find({ listed: true });
         res.render("medicines", { medicines });
@@ -461,42 +478,9 @@ app.get("/user/medicines",isUserLoggedIn, async (req, res) => {
         res.redirect("/?errorMsg=Failed+to+load+medicines");
     }
 });
-// Route to add item to cart
-app.post('/cart/add', isUserLoggedIn, async (req, res) => {
-    const { medicineId, quantity } = req.body;
-    const userId = req.session.user.id;
 
-    try {
-        // Find the user
-        const user = await db.User.findById(userId);
-
-        if (!user) {
-            return res.redirect('/user/medicines?errorMsg=User+not+found');
-        }
-
-        // Check if the medicine is already in the cart
-        const existingItem = user.cart.find(item => item.medicineId.toString() === medicineId);
-
-        if (existingItem) {
-            // Update quantity if medicine already exists in cart
-            existingItem.quantity += parseInt(quantity);
-        } else {
-            // Add new item to cart
-            user.cart.push({ medicineId, quantity: parseInt(quantity) });
-        }
-
-        // Save the user document
-        await user.save();
-        res.redirect('/user/medicines?successMsg=Medicine+added+to+cart');
-    } catch (err) {
-        console.error(err);
-        res.redirect('/user/medicines?errorMsg=Failed+to+add+medicine+to+cart');
-    }
-});
-
-
-// Route to view the cart
-app.get('/user/cart',isUserLoggedIn, async (req, res) => {
+// View cart - user
+app.get('/user/cart', userLogIn, async (req, res) => {
     try {
         const userId = req.session.user.id;
         const user = await db.User.findById(userId).populate('cart.medicineId');
@@ -520,75 +504,54 @@ app.get('/user/cart',isUserLoggedIn, async (req, res) => {
     }
 });
 
-app.post('/user/cart/remove', isUserLoggedIn, async (req, res) => {
-    const { medicineId } = req.body;
-    const userId = req.user.id;
-    console.log(medicineId, userId, medicineId._id);
-    // Validate the medicineId format
-    if (!mongoose.Types.ObjectId.isValid(medicineId._id)) {
-        return res.redirect('/user/cart?errorMsg=Invalid+medicine+ID');
-    }
-
-    // Convert medicineId to ObjectId
-    const medicineObjectId = mongoose.Types.ObjectId(medicineId);
-
+//Add item to cart - user
+app.post('/cart/add', userLogIn, async (req, res) => {
+    const { medicineId, quantity } = req.body;
+    const userId = req.session.user.id;
     try {
-        // Fetch the user from the database
         const user = await db.User.findById(userId);
-
         if (!user) {
-            return res.redirect('/user/cart?errorMsg=User+not+found');
+            return res.redirect('/user/medicines?errorMsg=User+not+found');
         }
-
-        // Log cart before removal for debugging
-        console.log('Cart before removal:', user.cart);
-
-        // Remove the item from the cart
-        user.cart = user.cart.filter(item => item.medicineId.toString() !== medicineObjectId.toString());
-
-        // Log cart after removal for debugging
-        console.log('Cart after removal:', user.cart);
-
-        // Save the updated user document
+        const existingItem = user.cart.find(item => item.medicineId.toString() === medicineId);
+        if (existingItem) {
+            existingItem.quantity += parseInt(quantity);
+        } else {
+            user.cart.push({ medicineId, quantity: parseInt(quantity) });
+        }
         await user.save();
-        res.redirect('/user/cart?successMsg=Medicine+removed+from+cart');
+        res.redirect('/user/medicines?successMsg=Medicine+added+to+cart');
     } catch (err) {
         console.error(err);
-        res.redirect('/user/cart?errorMsg=Failed+to+remove+medicine+from+cart');
+        res.redirect('/user/medicines?errorMsg=Failed+to+add+medicine+to+cart');
     }
 });
 
-app.get('/user/checkout', isUserLoggedIn, async (req, res) => {
+//Checkout - User
+app.get('/user/checkout', userLogIn, async (req, res) => {
     const userId = req.session.user.id;
-
     try {
         const user = await db.User.findById(userId).populate('cart.medicineId').exec();
-
         if (!user) {
             return res.redirect('/user/cart?errorMsg=User+not+found');
         }
-
         const cartItems = user.cart.map(item => ({
             ...item.medicineId._doc,
             quantity: item.quantity
         }));
-
-        // Determine which medicines require a prescription
         const medicinesRequiringPrescription = cartItems.filter(item => item.prescriptionRequired);
-
         let prescriptions = [];
         if (medicinesRequiringPrescription.length > 0) {
             prescriptions = await db.Prescription.find({ userId });
         }
-
         res.render('checkout', {
             cartItems,
             address: user.address || '',
-            pincode: user.pincode || '',
+            pincode: user.pinCode || '',
             errorMsg: req.query.errorMsg,
             successMsg: req.query.successMsg,
-            medicinesRequiringPrescription, // Pass this to the view
-            prescriptions // Pass this to the view
+            medicinesRequiringPrescription, 
+            prescriptions
         });
     } catch (err) {
         console.error(err);
@@ -596,26 +559,20 @@ app.get('/user/checkout', isUserLoggedIn, async (req, res) => {
     }
 });
 
-
-app.post('/user/checkout', isUserLoggedIn, async (req, res) => {
+app.post('/user/checkout', userLogIn, async (req, res) => {
     const userId = req.session.user.id;
     const { address, pincode, paymentMethod, selectedPrescription } = req.body;
-
     try {
-        // Find the user and their cart items
         const user = await db.User.findById(userId).populate('cart.medicineId').exec();
         if (!user) {
             return res.redirect('/user/cart?errorMsg=User+not+found');
         }
-
-        // Calculate order value and create the order
         const items = user.cart.map(item => ({
             productId: item.medicineId._id,
             quantity: item.quantity,
             price: item.medicineId.productPrice
         }));
         const orderValue = items.reduce((total, item) => total + (item.quantity * item.price), 0);
-
         const order = new db.Order({
             items,
             orderValue,
@@ -624,17 +581,12 @@ app.post('/user/checkout', isUserLoggedIn, async (req, res) => {
             address,
             pincode,
             status: 'Pending',
-            prescriptionId: selectedPrescription ? [selectedPrescription] : [] // Add selectedPrescription if present
+            prescriptionId: selectedPrescription ? [selectedPrescription] : []
         });
-
-        // Save the order
         await order.save();
-
-        // Update the user with the new order
         user.orderId.push(order._id);
-        user.cart = []; // Clear the cart after order is placed
+        user.cart = []; 
         await user.save();
-
         res.redirect('/user/checkout?successMsg=Order+placed+successfully');
     } catch (err) {
         console.error(err);
@@ -642,17 +594,15 @@ app.post('/user/checkout', isUserLoggedIn, async (req, res) => {
     }
 });
 
-app.get('/user/show-orders', isUserLoggedIn, async (req, res) => {
+//Show Orders - user
+app.get('/user/show-orders', userLogIn, async (req, res) => {
     try {
-        // Fetch orders for the logged-in user and populate the product details
         const orders = await db.Order.find({ userId: req.session.user.id })
             .populate({
                 path: 'items.productId',
-                select: 'productName'  // Only include the productName field
+                select: 'productName'  
             })
             .exec();
-
-        console.log(orders); // For debugging
         res.render('show-orders', { orders });
     } catch (err) {
         console.error(err);
@@ -660,99 +610,8 @@ app.get('/user/show-orders', isUserLoggedIn, async (req, res) => {
     }
 });
 
-
-app.get('/admin/show-all-orders', isAdminLoggedIn, async (req, res) => {
-    try {
-        const orders = await db.Order.find().populate({
-            path: 'items.productId',
-            select: 'productName'
-        }).exec(); 
-        res.render('show-all-orders', { orders });
-    } catch (err) {
-        console.error(err);
-        res.render('show-all-orders', { orders: [], errorMsg: 'Failed to load orders.' });
-    }
-});
-
-// Route to update order status
-app.post('/admin/update-order-status/:orderId', isAdminLoggedIn, async (req, res) => {
-    const { orderId } = req.params;
-    const { status } = req.body;
-
-    if (!['Pending', 'Approved', 'Cancelled'].includes(status)) {
-        return res.redirect('/admin/show-all-orders'); // Redirect if invalid status
-    }
-
-    try {
-        await db.Order.findByIdAndUpdate(orderId, { status }).exec();
-        res.redirect('/admin/show-all-orders'); // Redirect to the orders page after updating
-    } catch (err) {
-        console.error(err);
-        res.redirect('/admin/show-all-orders');
-    }
-});
-
-app.post('/user/update-details', isUserLoggedIn, async (req, res) => {
-    try {
-        const { name, phoneNumber, address, pinCode, gender } = req.body;
-
-        // Validate input (optional but recommended)
-        if (!name || !phoneNumber || !address || !pinCode || !gender) {
-            return res.status(400).send('All fields are required.');
-        }
-
-        // Update user details
-        await db.User.findByIdAndUpdate(req.session.user.id, {
-            name,
-            phoneNumber,
-            address,
-            pinCode,
-            gender
-        });
-
-        // Optionally, you can update session user data here
-        req.session.user = { ...req.session.user, name, phoneNumber, address, pinCode, gender };
-
-        // Redirect to the same page or user dashboard
-        res.redirect('/user/update-details'); // Change to user dashboard if needed
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Error updating details.');
-    }
-});
-
-// Route to handle password change
-app.post('/user/change-password', isUserLoggedIn, async (req, res) => {
-    try {
-        const { currentPassword, newPassword, confirmPassword } = req.body;
-
-        // Check if new password and confirm password match
-        if (newPassword !== confirmPassword) {
-            return res.render('update-details', { user: req.session.user, errorMsg: 'Passwords do not match.' });
-        }
-
-        // Fetch the user from the database
-        const user = await db.User.findById(req.session.user.id).exec();
-
-        // Check if the current password is correct
-        if (user.password !== currentPassword) {
-            return res.render('update-details', { user: req.session.user, errorMsg: 'Current password is incorrect.' });
-        }
-
-        // Update the password
-        user.password = newPassword;
-        await user.save();
-
-        // Redirect or render a success message
-        res.render('update-details', { user: req.session.user, successMsg: 'Password changed successfully.' });
-    } catch (err) {
-        console.error(err);
-        res.render('update-details', { user: req.session.user, errorMsg: 'Failed to change password.' });
-    }
-});
-
-
-app.get('/user/update-details', isUserLoggedIn, async (req, res) => {
+//Update Details - user
+app.get('/user/update-details', userLogIn, async (req, res) => {
     try {
         const user = await db.User.findById(req.session.user.id).exec();
         if (!user) {
@@ -765,47 +624,82 @@ app.get('/user/update-details', isUserLoggedIn, async (req, res) => {
     }
 });
 
-app.get('/user/prescriptions', isUserLoggedIn, async (req, res) => {
+app.post('/user/update-details', userLogIn, async (req, res) => {
+    try {
+        const { name, phoneNumber, address, pinCode, gender } = req.body;
+        if (!name || !phoneNumber || !address || !pinCode || !gender) {
+            return res.status(400).send('All fields are required.');
+        }
+        await db.User.findByIdAndUpdate(req.session.user.id, {
+            name,
+            phoneNumber,
+            address,
+            pinCode,
+            gender
+        });
+        req.session.user = { ...req.session.user, name, phoneNumber, address, pinCode, gender };
+        res.redirect('/user/update-details'); 
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error updating details.');
+    }
+});
+
+//Change Password - User
+app.post('/user/change-password', userLogIn, async (req, res) => {
+    try {
+        const { currentPassword, newPassword, confirmPassword } = req.body;
+        if (newPassword !== confirmPassword) {
+            return res.render('update-details', { user: req.session.user, errorMsg: 'Passwords do not match.' });
+        }
+        const user = await db.User.findById(req.session.user.id).exec();
+        if (user.password !== currentPassword) {
+            return res.render('update-details', { user: req.session.user, errorMsg: 'Current password is incorrect.' });
+        }
+        user.password = newPassword;
+        await user.save();
+        res.render('update-details', { user: req.session.user, successMsg: 'Password changed successfully.' });
+    } catch (err) {
+        console.error(err);
+        res.render('update-details', { user: req.session.user, errorMsg: 'Failed to change password.' });
+    }
+});
+
+//See Prescriptions - User
+app.get('/user/prescriptions', userLogIn, async (req, res) => {
     try {
         const prescriptions = await db.Prescription.find({ userId: req.user.id }).exec();
         res.render('prescription', { prescriptions });
     } catch (err) {
-        console.error('Error fetching prescriptions:', err); // Debug: Log error
+        console.error('Error:', err); 
         res.status(500).send('Error fetching prescriptions.');
     }
 });
 
-// Route to handle adding a new prescription
-app.post('/user/prescriptions', isUserLoggedIn, async (req, res) => {
+//Add a new Prescription - User
+app.post('/user/prescriptions', userLogIn, async (req, res) => {
     try {
         const { doctorName, content, title, desc } = req.body;
-
-        // Create a new prescription
         const newPrescription = new db.Prescription({
             doctorName,
             content,
             title,
             desc,
-            userId: req.session.user.id // Store the logged-in user's ID
+            userId: req.session.user.id 
         });
-
         const savedPrescription = await newPrescription.save();
-
-        // Update the user's prescription array
         await db.User.findByIdAndUpdate(req.session.user.id, {
             $push: { prescriptionId: savedPrescription._id }
         });
-
-        res.redirect('/user/prescriptions'); // Redirect to the prescription list page
+        res.redirect('/user/prescriptions'); 
     } catch (err) {
         console.error(err);
         res.status(500).send('Error creating prescription.');
     }
 });
 
-
-// Route to handle editing a prescription
-app.get('/user/prescriptions/:id/edit', isUserLoggedIn, async (req, res) => {
+// Edit Prescription - User
+app.get('/user/prescriptions/:id/edit', userLogIn, async (req, res) => {
     try {
         const prescription = await db.Prescription.findById(req.params.id).exec();
         if (!prescription) {
@@ -818,20 +712,16 @@ app.get('/user/prescriptions/:id/edit', isUserLoggedIn, async (req, res) => {
     }
 });
 
-// Route to handle updating a prescription
-app.post('/user/prescriptions/:id/update', isUserLoggedIn, async (req, res) => {
+// Update a Prescription - user
+app.post('/user/prescriptions/:id/update', userLogIn, async (req, res) => {
     try {
         const { title, desc, doctorName, content } = req.body;
-
-        // Update the prescription in the database
         await db.Prescription.findByIdAndUpdate(req.params.id, {
             title,
             desc,
             doctorName,
             content
         });
-
-        // Redirect to the user's prescriptions page after updating
         res.redirect('/user/prescriptions');
     } catch (err) {
         console.error(err);
@@ -839,27 +729,32 @@ app.post('/user/prescriptions/:id/update', isUserLoggedIn, async (req, res) => {
     }
 });
 
-// Route to handle deleting a prescription
-app.post('/user/prescriptions/:id/delete', isUserLoggedIn, async (req, res) => {
+// Delete prescription - user
+app.post('/user/prescriptions/:id/delete', userLogIn, async (req, res) => {
     try {
         const prescriptionId = req.params.id;
-
-        // Find and delete the prescription
         const deletedPrescription = await db.Prescription.findByIdAndDelete(prescriptionId);
-
         if (deletedPrescription) {
-            // Remove the prescription ID from the user's prescriptionId array
             await db.User.findByIdAndUpdate(req.session.user.id, {
                 $pull: { prescriptionId: prescriptionId }
             });
         }
-
-        // Redirect to the user's prescriptions page after deletion
         res.redirect('/user/prescriptions');
     } catch (err) {
         console.error(err);
         res.status(500).send('Error deleting prescription.');
     }
+});
+
+//Logout
+app.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Failed to destroy session:', err);
+            return res.redirect('/admin');
+        }
+        res.redirect('/login');
+    });
 });
 
 //Server

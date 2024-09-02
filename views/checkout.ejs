@@ -17,7 +17,7 @@
         h1 {
             text-align: center;
             margin-top: 20px;
-            color: #4CAF50;
+            color: #007bff;
         }
 
         .container {
@@ -35,7 +35,7 @@
             font-size: 16px;
             font-weight: bold;
             color: #fff;
-            background-color: #4CAF50;
+            background-color: #007bff;
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -44,7 +44,7 @@
         }
 
         .back-link:hover {
-            background-color: #45a049;
+            background-color: #0056b3;
         }
 
         h2 {
@@ -58,13 +58,8 @@
             font-weight: bold;
         }
 
-        input[type="text"],
-        input[type="radio"] {
-            margin-top: 5px;
-            display: block;
-        }
-
         input[type="text"] {
+            margin-top: 5px;
             width: calc(100% - 22px);
             padding: 10px;
             border: 1px solid #ddd;
@@ -97,7 +92,7 @@
             font-size: 16px;
             font-weight: bold;
             color: #fff;
-            background-color: #4CAF50;
+            background-color: #007bff;
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -105,10 +100,52 @@
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #0056b3;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul li {
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        ul li:last-child {
+            border-bottom: none;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table th,
+        table td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        table th {
+            background-color: #f4f4f4;
+        }
+
+        .payment-methods label {
+            display: inline-block;
+            margin-right: 15px;
+            font-weight: normal;
+        }
+
+        .payment-methods input[type="radio"] {
+            margin-right: 5px;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <a href="/user" class="back-link">Go Back to Dashboard</a>
@@ -138,14 +175,12 @@
                                                     <%= item.productName %>
                                                 </strong><br>
                                                 Quantity: <%= item.quantity %><br>
-                                                    Price: <%= item.productPrice %><br>
-                                                        Total: <%= item.quantity * item.productPrice %>
+                                                    Price: ₹<%= item.productPrice %><br>
+                                                        Total: ₹<%= item.quantity * item.productPrice %>
                                             </li>
                                             <% }) %>
                                     </ul>
                                     <% } %>
-
-                                        <!-- Prescription Selection Section -->
                                         <% if (medicinesRequiringPrescription.length> 0) { %>
                                             <h2>Select a Prescription</h2>
                                             <table>
@@ -185,24 +220,22 @@
                                                     required><br>
 
                                                 <h2>Payment Method</h2>
-                                                <label><input type="radio" name="paymentMethod" value="UPI" required>
-                                                    UPI</label><br>
-                                                <label><input type="radio" name="paymentMethod" value="Debit Card"
-                                                        required> Debit Card</label><br>
-                                                <label><input type="radio" name="paymentMethod" value="Credit Card"
-                                                        required> Credit Card</label><br>
-                                                <label><input type="radio" name="paymentMethod" value="Netbanking"
-                                                        required> Netbanking</label><br>
-                                                <label><input type="radio" name="paymentMethod" value="COD" required>
-                                                    Cash on Delivery</label><br>
+                                                <div class="payment-methods">
+                                                    <label><input type="radio" name="paymentMethod" value="UPI"
+                                                            required> UPI</label>
+                                                    <label><input type="radio" name="paymentMethod" value="Debit Card"
+                                                            required> Debit Card</label>
+                                                    <label><input type="radio" name="paymentMethod" value="Credit Card"
+                                                            required> Credit Card</label>
+                                                    <label><input type="radio" name="paymentMethod" value="Netbanking"
+                                                            required> Netbanking</label>
+                                                    <label><input type="radio" name="paymentMethod" value="COD"
+                                                            required> Cash on Delivery</label>
+                                                </div>
 
                                                 <button type="submit">Place Order</button>
                         </form>
     </div>
 </body>
-
-</html>
-
-
 
 </html>
